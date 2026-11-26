@@ -6,9 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:db": "node --test --test-concurrency=1 \"tests/db/*.test.mjs\"",
+    "dev:local": "node scripts/dev-local.mjs",
+    "test:api": "node --test --test-concurrency=1 \"tests/api/*.test.mjs\"",
+    "test:web": "node --test --test-concurrency=1 \"tests/web/*.test.mjs\""
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.2",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"
@@ -20,6 +26,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "pg": "^8.23.1",
+    "supabase": "^3.4.0",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
   }
