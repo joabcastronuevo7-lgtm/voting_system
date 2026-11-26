@@ -30,6 +30,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# database dumps and backups: they show how every guest voted
+data.sql
+schema.sql
+*.dump
+*.7z
+/backup*/
+
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example

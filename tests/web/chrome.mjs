@@ -125,7 +125,10 @@ export async function launch() {
     }
 
     return {
-      goto: (url) => call("Page.navigate", { url }),
+      goto: (url) =>
+        call("Page.navigate", { url }).catch((error) => {
+          throw new Error(`${error.message} (${new URL(url).pathname})`);
+        }),
       evaluate,
       until,
       tap,
@@ -155,8 +158,12 @@ export async function launch() {
     await send("Browser.close").catch(() => child.kill());
     await Promise.race([exited, pause(5000)]);
     socket.close();
-    // the browser can hold its files a moment longer; a leftover temp folder is harmless
-    rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    try {
+      rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    } catch {
+      // Windows: the browser can hold its files a moment longer. A leftover temp folder is
+      // harmless, but throwing here would skip the rest of the test cleanup and hang the run.
+    }
   }
 
   return { phone, close };

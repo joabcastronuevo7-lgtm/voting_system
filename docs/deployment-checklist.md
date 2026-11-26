@@ -8,8 +8,9 @@ The application is ready locally. It is **not** proven in production. Steps mark
 | Area | Status |
 |---|---|
 | Application | Built; local automated tests pass |
-| Git | Repository on branch `master`, no remote. The application commit was prepared this day. If `git log --oneline` shows only "Initial commit from Create Next App", it is **not committed** yet. |
-| Hosted Supabase project `voting system` (`pssvsfhiybjgjbjtcsoa`) | Read-only check only: healthy, Tokyo, Postgres 17, free plan, no tables, no migrations. Auth settings and users not checked. Folder not linked. |
+| Git | Branch `master`, no remote. Application committed locally as `8dab8a2`. |
+| Hosted Supabase project `voting system` (`pssvsfhiybjgjbjtcsoa`) | Folder linked. **Both migrations applied.** `verify.sql`: zero rows. 9 tables, 3 categories, 1 Auth user, 1 organizer, 0 guests, 0 votes, registration closed, voting `not_started`, guest limit 400. Data API reachable; the public key is refused by the functions. App not tried against it. |
+| Sign-ups | Off, verified from the project's public Auth settings (`disable_signup: true`), email provider on, anonymous sign-ins off. |
 | Backup restore | Rehearsed locally inside a rolled-back transaction. **Hosted recovery unproven.** |
 | Deployment, real devices, projector | Not started |
 
@@ -29,28 +30,28 @@ linked project and the default is the local stack.
 - [ ] `npx supabase start` (Docker running).
 - [ ] `npm run test:db`, `npm run test:api`, `npm run test:web` (needs Chrome or Edge).
 - [ ] `npm run lint`, `npx tsc --noEmit`, `npm run build`, `npm audit`.
-- [ ] **APPROVE** Commit the staged application. Until then the only copy is this folder.
+- [x] Application committed locally (`8dab8a2`). The only copy is still this folder.
 - [ ] Keep a second copy: a private Git remote (**APPROVE** before any push), needed anyway if
       the host deploys from Git. Never commit `.env` files or backups.
 
 ## 2. Hosted Supabase project
 
-- [ ] Confirm it is the intended new project and that it is empty.
-- [ ] Postgres major version is 17, as in `supabase/config.jsonc`.
+- [x] Confirm it is the intended new project and that it is empty.
+- [x] Postgres major version is 17, as in `supabase/config.jsonc`.
 - [ ] Check the plan: whether idle projects are paused, and what backups it includes.
 - [ ] **Never run `supabase config push`.** `supabase/config.jsonc` describes the local stack;
       pushing it would send local Auth settings, with sign-ups enabled, to the hosted project.
-- [ ] You log in with `npx supabase login`. The Data API must be on, with `public` exposed.
-- [ ] `npx supabase link <project-ref>`
-- [ ] `npx supabase migration list --remote`
-- [ ] `npx supabase db push --remote --dry-run`: expect exactly
-      `20261126000000_initial_schema` and `20261126000001_seed`.
-- [ ] **APPROVE** `npx supabase db push --remote`. Do not add `--include-seed`: the seed is
-      already a migration.
-- [ ] Run `supabase/verify.sql` in the SQL editor. **Zero rows** means pass.
-- [ ] **APPROVE** Auth: turn off new sign-ups. Keep the email provider on.
-- [ ] **APPROVE** Create organizer accounts in Auth with long unique passwords and "Auto
-      Confirm" (you do this), then for each one:
+- [x] `npx supabase login` and `npx supabase link`.
+- [x] Both migrations applied on November 27 and listed as applied. Do not push seeds with
+      `--include-seed`: the seed is already a migration.
+- [x] `supabase/verify.sql` returned **zero rows**.
+- [x] The Data API is on and reaches the `public` functions.
+- [x] The one existing Auth user was confirmed by the owner and added as organizer.
+- [x] Auth: "Allow new users to sign up" turned off and saved; email provider on. Verify again
+      before the event: `https://pssvsfhiybjgjbjtcsoa.supabase.co/auth/v1/settings`, called
+      with the publishable key, reports `"disable_signup": true`.
+- [ ] Only if more organizers are needed, **APPROVE** creating their accounts in Auth with long
+      unique passwords and "Auto Confirm" (you do this), then for each one:
       `insert into public.admins (user_id) select id from auth.users where email = '<admin email>';`
 - [ ] `select count(*) from public.admins;` matches the number of organizers.
 
@@ -115,17 +116,59 @@ do not give you `supabase_admin`.
 - [ ] `supabase/rollback/initial_schema.down.sql` **deletes everything**. It is not a
       recovery step.
 
-## 4. Deploy
+## 4. Deploy on Vercel
 
-- [ ] Set on the host, **before the build**:
-      `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
-      `SUPABASE_SECRET_KEY` (server only), `NEXT_PUBLIC_SITE_URL` (final HTTPS address).
-      The `NEXT_PUBLIC_` values are built in: changing one needs a new build.
-- [ ] Keep `.env.local` out of anything shared. This folder syncs to OneDrive.
-- [ ] Keep `cacheComponents` off.
-- [ ] Limit who can read hosting logs and check retention: claim link paths appear in them
-      (see `event-readiness.md`).
-- [ ] **APPROVE** Deploy.
+Vercel's screen names may differ slightly. Nothing here has been tried on Vercel, and no
+Linux build has been run; the lockfile does list the Linux build packages.
+
+### Source
+
+- [ ] **APPROVE** Create a **private** Git repository and add it as the remote.
+- [ ] **APPROVE** Commit any pending changes, then push `master`.
+- [ ] Check the plan's usage terms: free hosting plans may be limited to non-commercial use.
+
+### Project settings
+
+| Setting | Value |
+|---|---|
+| Framework preset | Next.js |
+| Root directory | repository root |
+| Install, build and output commands | defaults |
+| Node.js version | 24.x (tested locally on 24.11.1) |
+| Function region | Tokyo (`hnd1`), next to the database. Check it: the default is elsewhere. |
+
+No `vercel.json` is needed. Keep `cacheComponents` off.
+
+### Environment variables
+
+Add all four **before the first build**, for the **Production** environment only. Preview
+builds would otherwise write to the live event database.
+
+| Name | Value | Mark as sensitive |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://pssvsfhiybjgjbjtcsoa.supabase.co` | no |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase, project settings, API keys: the **publishable** key (`sb_publishable_…`) | no |
+| `SUPABASE_SECRET_KEY` | Same page: the **secret** key (`sb_secret_…`) | **yes** |
+| `NEXT_PUBLIC_SITE_URL` | The production address, `https://<domain>`, no trailing slash | no |
+
+- Enter the secret key yourself, directly in Vercel. Never in chat, Git, a `NEXT_PUBLIC_`
+  name or this OneDrive folder.
+- The `NEXT_PUBLIC_` values are built into the app: after changing one, redeploy.
+- Choose the project name or domain first, so that the site address is known. After the
+  first deploy, confirm it matches; if not, correct it and redeploy.
+- Claim links use `NEXT_PUBLIC_SITE_URL`. The QR code uses the same final address.
+
+### Deploy
+
+- [x] Sign-ups confirmed off (section 2).
+- [ ] **APPROVE** Deploy. Importing a repository in Vercel normally deploys at once, so fill
+      in the variables on that screen before pressing **Deploy**.
+- [ ] Confirm the production address opens without a Vercel login, for guests and reviewers.
+- [ ] Later pushes to the production branch deploy automatically: do not push during the event.
+- [ ] Limit who can read the project's logs and check retention: claim link paths appear in
+      them (see `event-readiness.md`).
+- [ ] Reviewers use the live event database. Use test names, and reset before the event
+      (section 7).
 
 ## 5. Check the live site
 

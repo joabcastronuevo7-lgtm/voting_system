@@ -8,10 +8,10 @@ section and `deployment-checklist.md` are current.
 | Area | State |
 |---|---|
 | Application | Guest registration and voting, organizer panel, claim links and winners presentation are built. This includes the close and reopen confirmations that phase 1 left for later. |
-| Database | The two phase 1 migrations are unchanged by the later work. **Not applied to the hosted project.** |
-| Real Data API calls and organizer sign-in | Covered by local tests. Not tried on a hosted project. |
-| Hosted project | Read on November 27, nothing changed: no tables, no migrations, Postgres 17. |
-| Git | Branch `master`, no remote. The application commit was prepared on November 27. If `git log --oneline` shows only the starter commit, it is not committed yet. |
+| Database | The two phase 1 migrations are unchanged by the later work. **Applied to the hosted project on November 27.** |
+| Real Data API calls and organizer sign-in | Covered by local tests. The application has not been tried against the hosted project. |
+| Hosted project | `verify.sql` returned zero rows. 1 Auth user, 1 organizer, no guests or votes, registration closed, voting not started. Public sign-ups off (verified). |
+| Git | Branch `master`, no remote. Application committed locally as `8dab8a2`. |
 | Backups | Procedure written. Local restore rehearsed in a rolled-back transaction. **Hosted recovery unproven.** Backups link voters to their ballots and must be encrypted and access-restricted. |
 | Deployment | Not deployed. Real devices and projector untested. |
 
