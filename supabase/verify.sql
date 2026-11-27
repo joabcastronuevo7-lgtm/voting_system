@@ -21,7 +21,8 @@ functions(signature, allowed) as (values
   ('public.admin_issue_claim(uuid,text)', 'authenticated'),
   ('public.admin_remove_guest(uuid,text)', 'authenticated'),
   ('public.admin_restore_guest(uuid)', 'authenticated'),
-  ('public.admin_update_event_settings(boolean,text,integer,boolean,boolean,text)', 'authenticated')),
+  ('public.admin_update_event_settings(boolean,text,integer,boolean,boolean,text)', 'authenticated'),
+  ('public.admin_reset_event(text)', 'authenticated')),
 expected_categories(name, description) as (values
   ('Spotlight Stealer Award', 'presence and charisma.'),
   ('The Eyes-On-Me Award', 'confidence, and captivating personality.'),

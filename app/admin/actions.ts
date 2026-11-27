@@ -20,6 +20,8 @@ const ERRORS: Record<string, string> = {
   GUEST_NOT_FOUND: "That guest no longer exists. Reload this page.",
   GUEST_REMOVED: "That guest has already been removed. Reload this page.",
   GUEST_NOT_REMOVED: "That guest is already on the list. Reload this page.",
+  CONFIRM_RESET_REQUIRED: "Type RESET, in capital letters, to confirm.",
+  RESET_BLOCKED: "Close registration and voting before resetting.",
 };
 
 export type AdminState = { error?: string; link?: string };
@@ -77,6 +79,10 @@ export async function updateSettings(_: AdminState, form: FormData) {
     p_confirm_reopen: form.get("confirm_reopen") === "on",
     p_reopen_reason: text(form, "reason") || null,
   });
+}
+
+export async function resetEvent(_: AdminState, form: FormData) {
+  return run("admin_reset_event", { p_confirm: text(form, "confirm") });
 }
 
 export async function addGuest(_: AdminState, form: FormData) {

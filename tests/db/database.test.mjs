@@ -77,7 +77,8 @@ describe("seed and security configuration", () => {
     );
     assert.deepEqual(rows.map((r) => r.proname), [
       "admin_add_guest", "admin_dashboard", "admin_issue_claim", "admin_list_guests",
-      "admin_remove_guest", "admin_restore_guest", "admin_results", "admin_update_event_settings",
+      "admin_remove_guest", "admin_reset_event", "admin_restore_guest", "admin_results",
+      "admin_update_event_settings",
       "ballot_nominees", "claim_guest", "claim_preview", "guest_me", "is_admin",
       "public_results", "register_guest", "submit_ballot",
     ]);
@@ -596,6 +597,60 @@ describe("admin", () => {
       "guest_added", "claim_issued", "guest_removed", "guest_restored", "settings_updated",
     ]);
     assert.ok(rows.every((r) => r.admin_user_id === adminId && !r.details.includes(claim)));
+  });
+});
+
+describe("resetting the event", () => {
+  const tables = [
+    "guests", "guest_sessions", "guest_claims", "claim_failures", "votes", "admin_audit_logs",
+  ];
+  const counts = () => Promise.all(tables.map((table) => count(table)));
+  const resetEvent = (confirm = "RESET", id = adminId) =>
+    userValue(id, "admin_reset_event", confirm);
+  const seed = async () => {
+    const [voter, nominee] = [await register("Reset Voter"), await register("Reset Nominee")];
+    await setVoting("open");
+    await server("submit_ballot", voter.token, picks(nominee.id));
+    await userValue(adminId, "admin_issue_claim", nominee.id, newHash());
+    await db.query("insert into public.claim_failures (token_hash) values ($1)", [newHash()]);
+    await db.query(
+      "update public.event_settings set registration_open = false, voting_status = 'closed', max_active_guests = 10",
+    );
+  };
+
+  test("is refused without the confirmation word, while open, or for a non-organizer", async () => {
+    await seed();
+    const before = await counts();
+    assert.ok(before.every((n) => n > 0), `empty table before reset: ${before}`);
+    for (const word of [null, "", "reset", "RESET "]) {
+      await rejects(resetEvent(word), "CONFIRM_RESET_REQUIRED");
+    }
+    await rejects(resetEvent("RESET", outsiderId), "NOT_ADMIN");
+    await denied(server("admin_reset_event", "RESET"));
+    await denied(as("anon", null, "select public.admin_reset_event('RESET')"));
+    for (const status of ["open", "paused"]) {
+      await setVoting(status);
+      await rejects(resetEvent(), "RESET_BLOCKED");
+    }
+    await setVoting("closed");
+    await db.query("update public.event_settings set registration_open = true");
+    await rejects(resetEvent(), "RESET_BLOCKED");
+    assert.deepEqual(await counts(), before);
+  });
+
+  test("deletes the event data, restores the settings and keeps the setup", async () => {
+    await seed();
+    const admins = await count("admins");
+    await resetEvent();
+    assert.deepEqual(await counts(), [0, 0, 0, 0, 0, 0]);
+    const { rows } = await db.query(
+      "select registration_open, voting_status, max_active_guests from public.event_settings",
+    );
+    assert.deepEqual(rows, [
+      { registration_open: false, voting_status: "not_started", max_active_guests: 400 },
+    ]);
+    assert.equal(await count("award_categories"), 3);
+    assert.equal(await count("admins"), admins);
   });
 });
 

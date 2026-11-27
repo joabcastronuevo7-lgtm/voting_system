@@ -206,6 +206,9 @@ test("the organizer starts, reveals one award at a time, goes back and shows all
   await screen.tap(button("Start presentation"));
   await shows(screen, ["Spotlight Stealer Award", "Ana Winner", "3 votes"], ["Ben Tied", "Dee Winner"]);
   await fits(screen, HD, "award");
+  const sweeping = () =>
+    screen.evaluate(`getComputedStyle(document.querySelector(".spotlight") ?? document.body).animationName`);
+  assert.equal(await sweeping(), "spotlight");
   await screen.press("ArrowRight", "ArrowRight", 39);
   await shows(screen, ["Ben Tied", "Cara Tied", "Winners · Tie", "2 votes each"], ["Ana Winner", "Dee Winner"]);
   await fits(screen, HD, "tie");
@@ -220,6 +223,7 @@ test("the organizer starts, reveals one award at a time, goes back and shows all
   await screen.tap(button("Show all"));
   await shows(screen, [...WINNERS, "A night to celebrate"], OTHERS);
   await fits(screen, HD, "all");
+  assert.equal(await sweeping(), "none");
 
   // loaded once: a reopen does not reach an open screen, a reload does
   await setVoting("open");

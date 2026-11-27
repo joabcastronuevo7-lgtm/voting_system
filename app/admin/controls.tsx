@@ -2,7 +2,7 @@
 
 import { useActionState, type ReactNode } from "react";
 import type { VotingStatus } from "@/lib/contracts";
-import { updateSettings } from "./actions";
+import { resetEvent, updateSettings } from "./actions";
 
 const STATUS: Record<VotingStatus, string> = {
   not_started: "Not started",
@@ -19,6 +19,8 @@ export function Controls({
   voting: VotingStatus;
 }) {
   const [state, action, pending] = useActionState(updateSettings, {});
+  const [resetState, reset, resetting] = useActionState(resetEvent, {});
+  const canReset = !registrationOpen && (voting === "not_started" || voting === "closed");
 
   /** One button that sends one setting. */
   const change = (name: string, value: string, label: string, children?: ReactNode) => (
@@ -69,6 +71,23 @@ export function Controls({
               <input id="reason" name="reason" className="field" maxLength={500} required />
             </>,
           )}
+      </section>
+
+      <section className="card">
+        <h2 className="subtitle">Reset event</h2>
+        <p className="lead">
+          Permanently deletes every guest, vote, claim link and audit record. There is no undo.
+        </p>
+        {canReset ? (
+          <form action={reset} className="flex flex-col gap-3">
+            <label htmlFor="confirm" className="label">Type RESET to confirm</label>
+            <input id="confirm" name="confirm" className="field" autoComplete="off" required />
+            {resetState.error && <p role="alert" className="error">{resetState.error}</p>}
+            <button type="submit" className="btn" disabled={resetting}>Reset event</button>
+          </form>
+        ) : (
+          <p className="lead">Close registration and voting first.</p>
+        )}
       </section>
     </>
   );

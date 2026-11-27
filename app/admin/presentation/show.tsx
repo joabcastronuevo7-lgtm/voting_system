@@ -48,6 +48,8 @@ export function Show({ awards }: { awards: Award[] }) {
 
   return (
     <>
+      {/* one sweep per award; the key restarts it on every step */}
+      {step !== null && step < last && <div key={step} className="spotlight" aria-hidden />}
       <div className="stage-body" aria-live="polite">
         {step === null ? (
           <div key="start" className="reveal flex flex-col items-center gap-[3vmin]">

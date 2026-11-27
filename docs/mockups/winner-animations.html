@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Winner reveal mockups</title>
+<style>
+  :root { --ink:#0b0a08; --panel:#17140f; --gold:#d9b65a; --ivory:#f5efe0; --muted:#b8af9b; }
+  body { margin:0; padding:16px; background:var(--ink); color:var(--ivory); font-family:system-ui,sans-serif; text-align:center; }
+  main { display:grid; gap:20px; max-width:760px; margin:auto; }
+  h1,h2 { font-family:Georgia,serif; font-weight:400; }
+  h2 { color:var(--gold); margin:0 0 8px; }
+  p { color:var(--muted); margin:6px 0 10px; }
+  .stage { position:relative; aspect-ratio:16/9; overflow:hidden; container-type:inline-size; border:1px solid #d9b65a55; border-radius:16px;
+           background:radial-gradient(ellipse at top,#3a2f16,var(--ink) 65%); }
+  .card { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2cqw; }
+  .eyebrow { margin:0; text-transform:uppercase; letter-spacing:.3em; color:var(--gold); font-size:2.2cqw; }
+  .name { margin:0; font:8cqw Georgia,serif; color:var(--ivory); }
+  button { min-height:44px; padding:0 28px; border:0; border-radius:99px; background:var(--gold); color:var(--ink); font-weight:600; cursor:pointer; }
+
+  /* 1. curtain */
+  .curtain { position:absolute; top:0; bottom:0; width:50.5%;
+             background:repeating-linear-gradient(90deg,#4a1016 0 4cqw,#7a1c25 6cqw,#4a1016 8cqw); }
+  .curtain.l { left:0; transform:translateX(-101%); } .curtain.r { right:0; transform:translateX(101%); }
+  .play .curtain.l { animation:left 2.2s ease-in-out both; } .play .curtain.r { animation:right 2.2s ease-in-out both; }
+  @keyframes left { from,25% { transform:none } to { transform:translateX(-101%) } }
+  @keyframes right { from,25% { transform:none } to { transform:translateX(101%) } }
+
+  /* 2. spotlight */
+  .dark { position:absolute; inset:0; opacity:0; pointer-events:none;
+          background:radial-gradient(circle 16cqw at var(--x) 50%,transparent 60%,#000 100%); }
+  @property --x { syntax:"<percentage>"; inherits:false; initial-value:50%; }
+  .play .dark { animation:sweep 3.2s ease-in-out both; }
+  @keyframes sweep { 0% { --x:5%; opacity:1 } 30% { --x:90% } 55% { --x:15% } 75% { --x:50%; opacity:1 } 100% { --x:50%; opacity:0 } }
+
+  /* 3. confetti */
+  .play.pop .name { animation:pop .9s cubic-bezier(.2,1.6,.4,1) both; }
+  @keyframes pop { from { opacity:0; transform:scale(.2) } }
+  .bit { position:absolute; left:50%; top:50%; width:1.2cqw; height:2cqw; animation:fly 2.4s cubic-bezier(.15,.7,.4,1) both; }
+  @keyframes fly { from { transform:translate(0,0) } 60% { opacity:1 } to { opacity:0; transform:translate(var(--dx),var(--dy)) rotate(var(--r)) } }
+
+  @media (prefers-reduced-motion:reduce) { .play *, .bit { animation:none !important } .bit { display:none } }
+</style>
+<main>
+  <h1>Winner reveal: 3 mockups</h1>
+  <p>Sample name only. Press Replay to run each one.</p>
+
+  <section><h2>1. Curtain opening</h2><p>Red curtains hold, then part to show the winner.</p>
+    <div class="stage" id="a"><div class="card"></div><div class="curtain l"></div><div class="curtain r"></div></div>
+    <p><button data-for="a">Replay</button></p></section>
+
+  <section><h2>2. Spotlight search</h2><p>A spotlight sweeps the dark stage, settles on the winner, then lights up.</p>
+    <div class="stage" id="b"><div class="card"></div><div class="dark"></div></div>
+    <p><button data-for="b">Replay</button></p></section>
+
+  <section><h2>3. Gold confetti burst</h2><p>The name pops in and confetti bursts from the centre.</p>
+    <div class="stage pop" id="c"><div class="card"></div></div>
+    <p><button data-for="c">Replay</button></p></section>
+</main>
+<script>
+  for (const card of document.querySelectorAll(".card"))
+    card.innerHTML = '<p class="eyebrow">Fashion Icon Award</p><p class="name">Sample Winner</p><p class="eyebrow">Winner</p>';
+
+  function play(id) {
+    const stage = document.getElementById(id);
+    stage.classList.remove("play");
+    stage.querySelectorAll(".bit").forEach((bit) => bit.remove());
+    void stage.offsetWidth; // restarts the CSS animations
+    stage.classList.add("play");
+    if (id !== "c") return;
+    for (let i = 0; i < 90; i++) {
+      const bit = document.createElement("i"), angle = Math.random() * 2 * Math.PI, far = 15 + Math.random() * 40;
+      bit.className = "bit";
+      bit.style.cssText = `background:${["#d9b65a", "#f5efe0", "#a8843a"][i % 3]};--dx:${Math.cos(angle) * far}cqw;--dy:${Math.sin(angle) * far * 0.6 + 8}cqw;--r:${Math.random() * 900}deg`;
+      stage.append(bit);
+    }
+  }
+  for (const button of document.querySelectorAll("button")) {
+    button.onclick = () => play(button.dataset.for);
+    play(button.dataset.for);
+  }
+</script>
+</html>

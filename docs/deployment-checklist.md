@@ -195,17 +195,11 @@ Use test names only.
 - [ ] Full run with several people registering at once, including the rate limit message.
 - [ ] Decide who opens and closes registration and voting, and who issues claim links.
 - [ ] Prepare a fallback for a venue network failure.
-- [ ] Back up. Then **APPROVE** clearing rehearsal data in the SQL editor. This permanently
-      deletes every guest, session, claim, vote and audit record:
-
-```sql
-begin;
-truncate public.votes, public.guest_sessions, public.guest_claims, public.claim_failures,
-         public.admin_audit_logs, public.guests;
-update public.event_settings
-   set registration_open = false, voting_status = 'not_started', max_active_guests = 400;
-commit;
-```
+- [ ] **APPROVE** applying migration `20261127000000_reset_event.sql` to the hosted project,
+      before deploying the code that uses it.
+- [ ] Back up. Then **APPROVE** clearing rehearsal data: close registration and voting, and use
+      **Reset event** on the dashboard (type `RESET`). This permanently deletes every guest,
+      session, claim, vote and audit record.
 
 - [ ] Confirm the dashboard shows 0 guests, registration closed, voting not started.
 - [ ] After this reset, never run it again once real guests register.

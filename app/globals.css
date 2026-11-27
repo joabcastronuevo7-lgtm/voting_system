@@ -18,6 +18,34 @@
   }
 }
 
+/* where the winners spotlight is, left to right */
+@property --spot {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 50%;
+}
+
+@keyframes spotlight {
+  0% {
+    --spot: 5%;
+    opacity: 1;
+  }
+  30% {
+    --spot: 90%;
+  }
+  55% {
+    --spot: 15%;
+  }
+  75% {
+    --spot: 50%;
+    opacity: 1;
+  }
+  100% {
+    --spot: 50%;
+    opacity: 0;
+  }
+}
+
 @layer base {
   body {
     background: radial-gradient(ellipse at top, #2a2314, var(--color-ink) 55%) fixed
@@ -158,9 +186,17 @@
     @apply flex shrink-0 flex-wrap justify-center gap-6 px-4 pb-2 text-sm opacity-60
       focus-within:opacity-100 hover:opacity-100;
   }
+  /* a dark cover with a moving hole; invisible when motion is reduced */
+  .spotlight {
+    @apply pointer-events-none absolute inset-0 z-10 opacity-0;
+    background: radial-gradient(circle 22vmin at var(--spot) 50%, transparent 60%, #000 100%);
+  }
   @media (prefers-reduced-motion: no-preference) {
     .reveal {
       animation: reveal 600ms ease-out both;
+    }
+    .spotlight {
+      animation: spotlight 3200ms ease-in-out both;
     }
   }
 

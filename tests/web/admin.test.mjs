@@ -171,6 +171,20 @@ test("a stale 'Pause voting' tap cannot reopen closed voting", async () => {
   assert.equal((await setting()).voting_status, "closed");
 });
 
+test("an organizer can reset the event by typing RESET", async () => {
+  await register("Reset Me");
+  const admin = await signedIn();
+  // registration is open after reset(), so the button is not offered yet
+  assert.doesNotMatch((await admin.get("/admin")).html, />Reset event<\/button>/);
+  await admin.post("/admin", "Close registration");
+
+  const wrong = await admin.post("/admin", "Reset event", { confirm: "reset" });
+  assert.match(wrong.html, /Type RESET/);
+  assert.equal(await count("guests"), 1);
+  await admin.post("/admin", "Reset event", { confirm: "RESET" });
+  assert.equal(await count("guests"), 0);
+});
+
 // Guest management ------------------------------------------------------------
 
 test("the guest list shows who voted, never for whom", async () => {
