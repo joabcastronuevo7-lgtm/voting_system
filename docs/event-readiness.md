@@ -57,8 +57,8 @@ a claim link, or localhost.
 1. Deploy, and confirm `https://YOUR-DOMAIN/` shows the registration form.
 2. Set `NEXT_PUBLIC_SITE_URL` to that HTTPS address **before the production build**: the value
    is built into the app, so changing it needs a new build.
-3. Generate the code once, for example `npx qrcode -o dinner-qr.png -w 1200 https://YOUR-DOMAIN/`
-   (this downloads a tool: approve it first; it is not added to the project).
+3. Sign in as an organizer, open **QR code** (`/admin/qr`), check the address shown under
+   the code, and press **Download PNG**.
 4. Scan the printed copy with real iPhone and Android phones, register a test guest,
    then remove that guest in `/admin/guests`.
 5. Keep the domain unchanged after printing.

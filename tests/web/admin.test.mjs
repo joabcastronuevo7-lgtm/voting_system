@@ -6,6 +6,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { after, before, beforeEach, test } from "node:test";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
+import QRCode from "qrcode";
 import { localKeys } from "../../scripts/local-supabase.mjs";
 import { count, db, loadCategories, picks, register, reset, server, setVoting } from "../db/helpers.mjs";
 import { browser, startServer } from "./helpers.mjs";
@@ -64,6 +65,23 @@ const setting = async () =>
   (await db.query("select registration_open, voting_status from public.event_settings")).rows[0];
 const toLogin = /\/admin\/login/;
 const sentToLogin = (page) => toLogin.test(page.location ?? page.html);
+
+// Guest QR code ---------------------------------------------------------------
+
+test("only an organizer gets the guest QR code, and it points at the registration page", async () => {
+  for (const visitor of [browser(), await signedInOutsider()]) {
+    const page = await visitor.get("/admin/qr");
+    assert.ok(sentToLogin(page));
+    assert.doesNotMatch(page.html, /data:image\/png/);
+  }
+  const { html } = await (await signedIn()).get("/admin/qr");
+  // the test server's NEXT_PUBLIC_SITE_URL, followed by the registration page
+  const expected = await QRCode.toDataURL("http://localhost:3000/", { width: 1200 });
+  assert.ok(html.includes(`href="${expected}"`), "wrong or missing code");
+  assert.match(html, /download="dinner-awards-qr\.png"/);
+  assert.match(html, /http:\/\/localhost:3000\//);
+  assert.match(html, /Do not print this code/);
+});
 
 // Sign-in --------------------------------------------------------------------
 
