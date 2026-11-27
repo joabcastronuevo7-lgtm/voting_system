@@ -8,7 +8,8 @@ export default async function ThanksPage() {
   if (!guest.has_voted) redirect("/me");
 
   return (
-    <section className="card text-center">
+    <section className="card rise text-center">
+      <div className="medal" aria-hidden>✓</div>
       <h1 className="title">Your votes have been submitted!</h1>
       <p className="lead">Your ballot was recorded. Enjoy the evening.</p>
       <Link href="/me" className="btn">Back to my page</Link>

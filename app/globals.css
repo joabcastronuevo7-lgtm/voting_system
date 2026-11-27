@@ -46,6 +46,35 @@
   }
 }
 
+/* how full the turnout ring is */
+@property --turn {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@keyframes fill {
+  from {
+    --turn: 0;
+  }
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0) rotate(-120deg);
+  }
+}
+
+@keyframes shine {
+  from {
+    background-position: 100% 0;
+  }
+  60%,
+  to {
+    background-position: 0 0;
+  }
+}
+
 @layer base {
   body {
     background: radial-gradient(ellipse at top, #2a2314, var(--color-ink) 55%) fixed
@@ -76,7 +105,8 @@
     @apply text-center text-muted;
   }
   .card {
-    @apply flex flex-col gap-3 rounded-2xl border border-gold/30 bg-panel p-5;
+    @apply flex flex-col gap-3 rounded-2xl border border-gold/25 bg-panel p-5;
+    background-image: linear-gradient(160deg, #1f1a11, var(--color-panel));
   }
   .label {
     @apply font-medium;
@@ -89,9 +119,60 @@
     @apply inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full
       bg-gold px-6 font-semibold text-ink active:brightness-80 disabled:cursor-not-allowed
       disabled:opacity-45;
+    background-image: linear-gradient(100deg, #c79f42 30%, #f4de9c 50%, #c79f42 70%);
+    background-size: 250% 100%;
   }
   .btn-secondary {
     @apply border border-gold/60 bg-panel text-ivory;
+    background-image: none;
+  }
+  /* round gold seal on the welcome and thank-you screens */
+  .medal {
+    @apply mx-auto grid size-20 place-items-center rounded-full text-4xl text-ink;
+    background: radial-gradient(circle at 35% 30%, #fbe9ac, #b58c32);
+  }
+  .steps {
+    @apply flex gap-1.5;
+  }
+  .steps i {
+    @apply h-1 flex-1 rounded-full bg-ivory/10;
+  }
+  .steps i[data-done] {
+    @apply bg-gold;
+  }
+  /* initials come from an attribute, so the element's text stays the name alone */
+  .avatar {
+    @apply grid size-9 shrink-0 place-items-center rounded-full border border-gold text-sm
+      text-gold;
+  }
+  .avatar::before {
+    content: attr(data-initials);
+  }
+  .tag {
+    @apply w-fit rounded-full border border-gold/25 px-3 py-0.5 text-xs text-muted;
+  }
+  .tag-on {
+    @apply border-gold text-gold;
+  }
+  .turnout-ring {
+    @apply mx-auto grid size-36 place-items-center rounded-full font-serif text-3xl;
+    background:
+      radial-gradient(closest-side, var(--color-panel) 78%, transparent 80%),
+      conic-gradient(var(--color-gold) calc(var(--turn) * 1%), #ffffff1a 0);
+  }
+  /* organizer navigation, within thumb reach */
+  .tabs {
+    @apply fixed inset-x-0 bottom-0 z-10 mx-auto flex w-full max-w-md items-center justify-around
+      border-t border-gold/30 bg-ink/95 px-2 pb-[env(safe-area-inset-bottom)] text-sm;
+  }
+  .tabs :is(a, button) {
+    @apply inline-flex min-h-14 cursor-pointer items-center px-3 text-muted;
+  }
+  .tabs a[aria-current="page"] {
+    @apply text-gold underline underline-offset-4;
+  }
+  main:has(.tabs) {
+    @apply pb-24;
   }
   .link {
     @apply inline-flex min-h-11 shrink-0 cursor-pointer items-center text-gold underline
@@ -99,6 +180,11 @@
   }
   .error {
     @apply text-center text-danger;
+  }
+  /* success message, pinned to the top so it is seen from the bottom of the page */
+  .toast {
+    @apply fixed inset-x-4 top-4 z-20 mx-auto max-w-md rounded-xl border border-gold bg-panel
+      px-4 py-3 text-center text-ivory shadow-lg;
   }
   .option {
     @apply flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-gold/25
@@ -195,8 +281,25 @@
     .reveal {
       animation: reveal 600ms ease-out both;
     }
+    /* set --i to stagger neighbours */
+    .rise {
+      animation: reveal 600ms ease-out both;
+      animation-delay: calc(var(--i, 0) * 90ms);
+    }
+    .medal {
+      animation: pop 800ms cubic-bezier(0.2, 1.7, 0.4, 1) both;
+    }
+    .turnout-ring {
+      animation: fill 1400ms ease-out;
+    }
+    .btn:not(.btn-secondary, :disabled) {
+      animation: shine 2600ms ease-in-out infinite;
+    }
     .spotlight {
       animation: spotlight 3200ms ease-in-out both;
+    }
+    .toast {
+      animation: reveal 300ms ease-out both;
     }
   }
 

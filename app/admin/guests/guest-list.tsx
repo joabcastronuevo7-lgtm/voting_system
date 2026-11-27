@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import type { AdminGuest } from "@/lib/contracts";
+import { initials } from "@/lib/initials";
 import { addGuest, issueClaim, removeGuest, restoreGuest, type AdminState } from "../actions";
 
 const FILTERS = {
@@ -89,9 +90,12 @@ function Guest({ guest }: { guest: AdminGuest }) {
   const [removal, removeAction, removing] = useActionState(removeGuest, {}, page);
 
   return (
-    <li id={row} className="card">
-      <p className="break-words text-lg">{guest.full_name}</p>
-      <p className={guest.has_voted && !removed ? "text-sm text-gold" : "text-sm text-muted"}>
+    <li id={row} className="card rise">
+      <div className="flex items-center gap-3">
+        <span className="avatar" data-initials={initials(guest.full_name)} aria-hidden />
+        <p className="min-w-0 break-words text-lg">{guest.full_name}</p>
+      </div>
+      <p className={guest.has_voted && !removed ? "tag tag-on" : "tag"}>
         {removed ? `Removed: ${guest.removal_reason}` : guest.has_voted ? "Voted" : "Not voted"}
       </p>
       {removed ? (

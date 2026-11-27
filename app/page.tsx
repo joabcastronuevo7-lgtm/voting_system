@@ -8,8 +8,9 @@ export default async function Home() {
 
   return (
     <>
-      <h1 className="title">Who&apos;s Your Pick?</h1>
-      <p className="lead">First, tell us who you are.</p>
+      <div className="medal" aria-hidden>★</div>
+      <h1 className="title rise">Who&apos;s Your Pick?</h1>
+      <p className="lead rise">First, tell us who you are.</p>
       <RegisterForm />
     </>
   );

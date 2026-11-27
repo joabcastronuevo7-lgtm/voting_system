@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { requireAdmin } from "@/lib/admin";
 import type { Dashboard } from "@/lib/contracts";
 import { RefreshButton } from "../me/refresh-button";
@@ -25,12 +26,24 @@ export default async function AdminPage() {
       <AdminNav />
       <h1 className="title">Dashboard</h1>
       <dl className="grid grid-cols-2 gap-3">
-        {counts.map(([label, value]) => (
-          <div key={label} className="card gap-1 text-center">
-            <dt className="text-sm text-muted">{label}</dt>
-            <dd className="text-2xl">{value}</dd>
-          </div>
-        ))}
+        {counts.map(([label, value], i) => {
+          const ring = label === "Turnout";
+          return (
+            <div
+              key={label}
+              className={`card rise gap-1 text-center ${ring ? "order-first col-span-2" : ""}`}
+              style={{ "--i": i } as CSSProperties}
+            >
+              <dt className="text-sm text-muted">{label}</dt>
+              <dd
+                className={ring ? "turnout-ring" : "text-2xl"}
+                style={ring ? ({ "--turn": turnout } as CSSProperties) : undefined}
+              >
+                {value}
+              </dd>
+            </div>
+          );
+        })}
       </dl>
       <RefreshButton />
       {event.voting_status === "closed" && (

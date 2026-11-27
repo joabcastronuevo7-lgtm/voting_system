@@ -24,7 +24,7 @@ const ERRORS: Record<string, string> = {
   RESET_BLOCKED: "Close registration and voting before resetting.",
 };
 
-export type AdminState = { error?: string; link?: string };
+export type AdminState = { error?: string; link?: string; notice?: string };
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? "");
 
@@ -81,8 +81,10 @@ export async function updateSettings(_: AdminState, form: FormData) {
   });
 }
 
-export async function resetEvent(_: AdminState, form: FormData) {
-  return run("admin_reset_event", { p_confirm: text(form, "confirm") });
+export async function resetEvent(_: AdminState, form: FormData): Promise<AdminState> {
+  const state = await run("admin_reset_event", { p_confirm: text(form, "confirm") });
+  if (state.error) return state;
+  return { notice: "Event reset. All guests, votes and records were deleted." };
 }
 
 export async function addGuest(_: AdminState, form: FormData) {

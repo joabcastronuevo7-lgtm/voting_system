@@ -73,6 +73,30 @@ test("a nominee tapped before scripts load is kept, and is the one submitted", a
   );
 });
 
+test("the nominee search stays on screen down a long list, and filters it", async () => {
+  for (let i = 10; i < 35; i++) await register(`Long List ${i}`);
+  await setVoting("open");
+  const phone = await registeredPhone("Scrolling Voter");
+  await phone.goto(`${base}/vote`);
+  await phone.until(hydrated("#search"));
+
+  await phone.evaluate("window.scrollTo(0, document.body.scrollHeight)");
+  const { scrolled, top } = await phone.evaluate(
+    `({ scrolled: window.scrollY, top: document.querySelector("#search").getBoundingClientRect().top })`,
+  );
+  assert.ok(scrolled > 400, `list too short to scroll: ${scrolled}`);
+  assert.ok(top >= 0 && top < 20, `search box is at ${top}`);
+  if (process.env.SHOTS) await phone.screenshot(`${process.env.SHOTS}/search.png`);
+
+  // React ignores a plain value assignment, so use the native setter
+  await phone.evaluate(`(() => {
+    const box = document.querySelector("#search");
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(box, "list 34");
+    box.dispatchEvent(new Event("input", { bubbles: true }));
+  })()`);
+  await phone.until(`document.querySelectorAll("label.option").length === 1`);
+});
+
 test("Start voting answers the tap at once on a slow connection, and stays usable", async () => {
   await register("Some Nominee");
   await setVoting("open");

@@ -7,7 +7,7 @@ export function RegisterForm() {
   const [state, action, pending] = useActionState(register, { name: "" });
 
   return (
-    <form action={action} className="card">
+    <form action={action} className="card rise">
       <label htmlFor="name" className="label">Full name</label>
       <input
         id="name"

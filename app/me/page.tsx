@@ -21,8 +21,8 @@ export default async function MePage() {
 
   return (
     <>
-      <h1 className="title break-words">Hi, {guest.full_name}</h1>
-      <section className="card text-center">
+      <h1 className="title rise break-words">Hi, {guest.full_name}</h1>
+      <section className="card rise text-center">
         <h2 className="subtitle">{heading}</h2>
         <p className="lead">{detail}</p>
         {canVote ? (

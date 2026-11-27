@@ -40,6 +40,7 @@ export function Controls({
   return (
     <>
       {state.error && <p role="alert" className="error">{state.error}</p>}
+      {resetState.notice && <p role="status" className="toast">{resetState.notice}</p>}
 
       <section className="card">
         <h2 className="subtitle">Registration: {registrationOpen ? "Open" : "Closed"}</h2>

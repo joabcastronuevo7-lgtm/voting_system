@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guest and admin redesign</title>
+<style>
+  :root { --ink:#0b0a08; --panel:#17140f; --gold:#d9b65a; --ivory:#f5efe0; --muted:#b8af9b; --line:#d9b65a3d; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:24px 16px; background:var(--ink); color:var(--ivory); font:15px/1.45 system-ui,sans-serif; text-align:center; }
+  h1,h2,h3,.serif { font-family:Georgia,serif; font-weight:400; margin:0; }
+  h2 { color:var(--gold); margin:32px 0 14px; }
+  p { margin:0; } .muted { color:var(--muted); }
+  .eyebrow { color:var(--gold); font-size:11px; letter-spacing:.3em; text-transform:uppercase; }
+  .row { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; align-items:flex-start; }
+  figure { margin:0; } figcaption { color:var(--muted); margin-top:8px; }
+  .phone { position:relative; overflow:hidden; width:300px; height:600px; padding:28px 18px; display:flex; flex-direction:column; gap:14px;
+           border:1px solid var(--line); border-radius:32px; background:radial-gradient(ellipse at top,#352b14,var(--ink) 60%); }
+  .card { background:linear-gradient(160deg,#1f1a11,var(--panel)); border:1px solid var(--line); border-radius:18px; padding:14px; }
+  .btn { display:flex; align-items:center; justify-content:center; min-height:48px; width:100%; border:0; border-radius:99px; font:600 15px system-ui; color:var(--ink);
+         background:linear-gradient(100deg,#c79f42 30%,#f4de9c 50%,#c79f42 70%) 0 0/250% 100%; cursor:pointer; }
+  .field { min-height:48px; border:1px solid var(--gold); border-radius:14px; padding:0 14px; display:flex; align-items:center; color:var(--muted); }
+  .medal { width:72px; height:72px; margin:8px auto; border-radius:50%; display:grid; place-items:center; font-size:32px; color:var(--ink); background:radial-gradient(circle at 35% 30%,#fbe9ac,#b58c32); }
+  .steps { display:flex; gap:6px; } .steps i { flex:1; height:4px; border-radius:9px; background:#ffffff1f; } .steps i.on { background:var(--gold); }
+  .pick { display:flex; align-items:center; gap:12px; text-align:left; padding:10px 12px; width:100%; color:inherit; font:inherit; cursor:pointer; }
+  .pick b { width:36px; height:36px; border-radius:50%; display:grid; place-items:center; border:1px solid var(--gold); color:var(--gold); font-weight:500; }
+  .pick span { flex:1; } .pick.on { border-color:var(--gold); background:#d9b65a26; } .pick.on::after { content:"✓"; color:var(--gold); }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; } .num { font:28px Georgia,serif; }
+  .ring { --p:68; width:130px; height:130px; margin:auto; border-radius:50%; display:grid; place-items:center;
+          background:radial-gradient(closest-side,var(--panel) 78%,transparent 80%),conic-gradient(var(--gold) calc(var(--p)*1%),#ffffff1a 0); }
+  .bar { display:flex; justify-content:space-around; margin:auto -18px -28px; padding:14px; border-top:1px solid var(--line); background:#0b0a08; color:var(--muted); font-size:12px; }
+  .bar .on { color:var(--gold); }
+  .tag { font-size:11px; border:1px solid var(--line); border-radius:99px; padding:3px 9px; color:var(--muted); } .tag.on { color:var(--gold); border-color:var(--gold); }
+  .toast { position:absolute; left:14px; right:14px; top:14px; padding:12px; border-radius:14px; border:1px solid var(--gold); background:#221c10; box-shadow:0 8px 24px #000a; }
+
+  /* animations: only .go parts move, so Replay can restart them */
+  @property --p { syntax:"<number>"; inherits:true; initial-value:68; }
+  @media (prefers-reduced-motion:no-preference) {
+    .go .rise { animation:rise .6s ease-out both; animation-delay:calc(var(--i,0)*90ms); }
+    .go .btn { animation:shine 2.6s ease-in-out infinite; }
+    .go .medal { animation:pop .8s cubic-bezier(.2,1.7,.4,1) both; }
+    .go .ring { animation:fill 1.4s ease-out both; }
+    .go .toast { animation:drop 4s ease both; }
+    .pick { transition:transform .15s, background .25s, border-color .25s; } .pick:active { transform:scale(.97); }
+  }
+  @keyframes rise { from { opacity:0; transform:translateY(14px) } }
+  @keyframes shine { from { background-position:100% 0 } 60%,to { background-position:0 0 } }
+  @keyframes pop { from { transform:scale(0) rotate(-120deg) } }
+  @keyframes fill { from { --p:0 } }
+  @keyframes drop { 0% { opacity:0; transform:translateY(-80px) } 12%,85% { opacity:1; transform:none } 100% { opacity:0; transform:translateY(-80px) } }
+</style>
+<h1>Redesign mockups</h1>
+<p class="muted">Sample data only. Nothing here changes the app.</p>
+<p style="max-width:220px;margin:14px auto 0"><button class="btn" id="replay">Replay animations</button></p>
+
+<h2>Guests</h2>
+<div class="row go">
+  <figure>
+    <div class="phone">
+      <div class="medal">★</div>
+      <p class="eyebrow rise">Dinner Awards 2026</p>
+      <h3 class="rise" style="--i:1;font-size:32px">Who’s your pick?</h3>
+      <p class="muted rise" style="--i:2">Three awards. One vote each.</p>
+      <div class="card rise" style="--i:3;display:flex;flex-direction:column;gap:12px;margin-top:20px">
+        <div class="field">Your full name</div><button class="btn">Continue to voting</button>
+      </div>
+    </div>
+    <figcaption>Welcome: medal pops, content rises, button shines</figcaption>
+  </figure>
+  <figure>
+    <div class="phone">
+      <div class="steps"><i class="on"></i><i></i><i></i></div>
+      <p class="eyebrow">Award 1 of 3</p>
+      <h3 style="font-size:24px">Fashion Icon Award</h3>
+      <button class="card pick rise" style="--i:1"><b>AR</b><span>Ana Reyes</span></button>
+      <button class="card pick rise on" style="--i:2"><b>BS</b><span>Ben Santos</span></button>
+      <button class="card pick rise" style="--i:3"><b>CL</b><span>Cara Lim</span></button>
+      <button class="card pick rise" style="--i:4"><b>DM</b><span>Dan Mercado</span></button>
+      <div style="margin-top:auto"><button class="btn">Next award</button></div>
+    </div>
+    <figcaption>Ballot: progress bar, initials, tap a name</figcaption>
+  </figure>
+  <figure>
+    <div class="phone" style="justify-content:center">
+      <div class="medal">✓</div>
+      <h3 class="rise" style="--i:2;font-size:30px">Vote received</h3>
+      <p class="muted rise" style="--i:3">Winners are revealed on stage.<br>Enjoy your evening.</p>
+    </div>
+    <figcaption>Thank you: seal stamps in</figcaption>
+  </figure>
+</div>
+
+<h2>Admin</h2>
+<div class="row go">
+  <figure>
+    <div class="phone">
+      <p class="eyebrow">Organizer</p>
+      <div class="card rise"><div class="ring"><div><div class="num">68%</div><div class="muted">turnout</div></div></div></div>
+      <div class="grid">
+        <div class="card rise" style="--i:1"><div class="num">150</div><div class="muted">Eligible</div></div>
+        <div class="card rise" style="--i:2"><div class="num">102</div><div class="muted">Voted</div></div>
+      </div>
+      <div class="card rise" style="--i:3;display:flex;justify-content:space-between;align-items:center"><span>Voting</span><span class="tag on">● Open</span></div>
+      <button class="btn">Pause voting</button>
+      <div class="bar"><span class="on">Dashboard</span><span>Guests</span><span>QR code</span></div>
+    </div>
+    <figcaption>Dashboard: turnout ring fills, bottom navigation</figcaption>
+  </figure>
+  <figure>
+    <div class="phone">
+      <h3 style="font-size:24px">Guests</h3>
+      <div class="field">Search a name</div>
+      <div class="card pick rise" style="--i:1"><b>AR</b><span>Ana Reyes</span><em class="tag on">Voted</em></div>
+      <div class="card pick rise" style="--i:2"><b>BS</b><span>Ben Santos</span><em class="tag">Not voted</em></div>
+      <div class="card pick rise" style="--i:3"><b>CL</b><span>Cara Lim</span><em class="tag on">Voted</em></div>
+      <button class="btn">Add guest</button>
+      <div class="bar"><span>Dashboard</span><span class="on">Guests</span><span>QR code</span></div>
+    </div>
+    <figcaption>Guests: search (new feature), status tags</figcaption>
+  </figure>
+  <figure>
+    <div class="phone">
+      <div class="toast" role="status">✓ Event reset. All guests, votes and records were deleted.</div>
+      <p class="eyebrow" style="margin-top:64px">Organizer</p>
+      <div class="card"><div class="ring" style="animation:none;--p:0"><div><div class="num">0%</div><div class="muted">turnout</div></div></div></div>
+      <div class="card" style="text-align:left"><h3 class="serif">Reset event</h3><p class="muted" style="margin:6px 0 10px">Type RESET to confirm.</p><div class="field">RESET</div></div>
+      <div class="bar"><span class="on">Dashboard</span><span>Guests</span><span>QR code</span></div>
+    </div>
+    <figcaption>After reset: notification slides in, then leaves</figcaption>
+  </figure>
+</div>
+<script>
+  document.getElementById("replay").onclick = () => {
+    for (const row of document.querySelectorAll(".row")) {
+      row.classList.remove("go"); void row.offsetWidth; row.classList.add("go");
+    }
+  };
+  for (const button of document.querySelectorAll("button.pick"))
+    button.onclick = () => document.querySelectorAll("button.pick").forEach((b) => b.classList.toggle("on", b === button));
+</script>
+</html>

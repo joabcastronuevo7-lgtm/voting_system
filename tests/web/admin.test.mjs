@@ -181,8 +181,10 @@ test("an organizer can reset the event by typing RESET", async () => {
   const wrong = await admin.post("/admin", "Reset event", { confirm: "reset" });
   assert.match(wrong.html, /Type RESET/);
   assert.equal(await count("guests"), 1);
-  await admin.post("/admin", "Reset event", { confirm: "RESET" });
+  assert.doesNotMatch(wrong.html, /Event reset./);
+  const done = await admin.post("/admin", "Reset event", { confirm: "RESET" });
   assert.equal(await count("guests"), 0);
+  assert.match(done.html, /role="status"[^>]*>Event reset./);
 });
 
 // Guest management ------------------------------------------------------------

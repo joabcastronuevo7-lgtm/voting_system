@@ -4,6 +4,7 @@ import Link from "next/link";
 import { unstable_rethrow, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import type { Ballot } from "@/lib/contracts";
+import { initials } from "@/lib/initials";
 import { submitBallot } from "../actions";
 
 export function BallotForm({ categories, nominees }: Ballot) {
@@ -95,6 +96,9 @@ export function BallotForm({ categories, nominees }: Ballot) {
 
   return (
     <>
+      <div className="steps" aria-hidden>
+        {categories.map((c, i) => <i key={c.id} data-done={i <= step || undefined} />)}
+      </div>
       <p className="text-center text-sm text-muted">
         Award {step + 1} of {categories.length}
       </p>
@@ -105,7 +109,7 @@ export function BallotForm({ categories, nominees }: Ballot) {
       <input
         id="search"
         type="search"
-        className="field"
+        className="field sticky top-2 z-10 shadow-[0_0_0_0.5rem_var(--color-ink)]"
         placeholder="Search by name"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
@@ -116,13 +120,16 @@ export function BallotForm({ categories, nominees }: Ballot) {
         <legend className="sr-only">Choose one guest for {category.name}</legend>
         {matches.map((n) => (
           <label key={n.id} className="option">
+            {/* scroll margin keeps a keyboard-focused name clear of the pinned search box */}
             <input
+              className="scroll-mt-24"
               type="radio"
               name={category.id}
               value={n.id}
               checked={picks[category.id] === n.id}
               onChange={() => setPicks({ ...picks, [category.id]: n.id })}
             />
+            <span className="avatar" data-initials={initials(n.full_name)} aria-hidden />
             <span className="min-w-0 break-words">{n.full_name}</span>
           </label>
         ))}
